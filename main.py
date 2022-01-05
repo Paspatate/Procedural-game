@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, math
 from random import randint
 
 from pygame.time import Clock
@@ -40,21 +40,37 @@ class Generator:
         self.__init__()
 
         up = ((HEIGHT//2)//SQUARE_SIZE)+7
-        down = self.lenMap-1
+        down = self.lenMap-2
 
         spawn_threshold = 4
 
+        sin_scale = 0
+        sin_size = 2
+        sin_offset = 0
 
+        for line in range(len(self.map[0])):
+            line_pose = int(math.sin(sin_scale+sin_offset)*sin_size)+sin_size+10
+            self.map[line_pose][line] = 1
+            for i in range(line_pose, self.lenMap-1):
+                self.map[i][line] = 1
+            sin_scale += .5
+
+    
         for rowNum in range(len(self.map)):
             for tile in range(len(self.map[rowNum])):
-                if rowNum == len(self.map)-1:
-                    self.map[rowNum][tile] = 1
 
                 if rowNum >= up and rowNum <= down:
                     rand = randint(1,1+abs(rowNum-len(self.map)))
                     if rand <= spawn_threshold:
-                        self.map[rowNum][tile] = 1
+                        self.map[rowNum][tile] = 0
+                
+                if rowNum == len(self.map)-2:
+                    self.map[rowNum][tile] = 1
+        
 
+
+
+            
 
 
 
@@ -62,7 +78,7 @@ world = Generator()
 
 class Rendering:
     def __init__(self) -> None:
-        self.square = pygame.Surface((SQUARE_SIZE,SQUARE_SIZE))
+        self.square = pygame.Surface((SQUARE_SIZE,SQUARE_SIZE)).convert()
     def Draw_map(self):
         map_rect = list()
         posY = 0
@@ -75,8 +91,7 @@ class Rendering:
                 posX += SQUARE_SIZE
             posY += SQUARE_SIZE
         return map_rect
-    def Draw_fps(self):
-        font = pygame.font.Font(pygame.font.get_default_font(),20)
+
         
 
 renderer = Rendering()
@@ -159,7 +174,7 @@ class Player(pygame.sprite.Sprite):  # création du joueur
             self.rect.x = self.SPAWN_X
             self.rect.y = self.SPAWN_Y
 
-
+count = 0
 world.Generate()
 player = Player()
 while run:
@@ -175,8 +190,6 @@ while run:
     #renderer.Draw_map()
     player.move()
     screen.blit(player.img, player.rect)
-    renderer.Draw_fps()
-
     pygame.display.update()
     clock.tick(fps)
     
