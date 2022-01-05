@@ -16,7 +16,6 @@ SQUARE_SIZE = 32
 run = True
 fps = 60
 
-pos = [randint(0,20)*SQUARE_SIZE,randint(0,12)*SQUARE_SIZE]
 
 def solidBlock():
     return pygame.Surface((SQUARE_SIZE,SQUARE_SIZE))
@@ -42,7 +41,7 @@ class Generator:
         up = ((HEIGHT//2)//SQUARE_SIZE)+7
         down = self.lenMap-2
 
-        spawn_threshold = 4
+        spawn_threshold = 3
 
         sin_scale = 0
         sin_size = 2
@@ -55,7 +54,7 @@ class Generator:
                 self.map[i][line] = 1
             sin_scale += .5
 
-    
+
         for rowNum in range(len(self.map)):
             for tile in range(len(self.map[rowNum])):
 
@@ -63,14 +62,13 @@ class Generator:
                     rand = randint(1,1+abs(rowNum-len(self.map)))
                     if rand <= spawn_threshold:
                         self.map[rowNum][tile] = 0
-                
-                if rowNum == len(self.map)-2:
-                    self.map[rowNum][tile] = 1
-        
+
+                if self.map[rowNum-1][tile] == 0 and self.map[rowNum][tile] != 0:
+                    self.map[rowNum][tile] = 2
 
 
 
-            
+
 
 
 
@@ -82,17 +80,25 @@ class Rendering:
     def Draw_map(self):
         map_rect = list()
         posY = 0
+        rowNum = 0
         for row in world.map:
             posX = 0
             for tile in row:
-                if tile == 1:
-                    screen.blit(solidBlock(),(posX,posY))
+                if tile != 0:
                     map_rect.append(self.square.get_rect(topleft=(posX, posY)))
+                if tile == 1:
+                    self.square.fill(color=(217,97,0))
+                    screen.blit(solidBlock(),(posX,posY))
+                elif tile == 2:
+                    self.square.fill("green3")
+                    screen.blit(self.square,(posX,posY))
+
                 posX += SQUARE_SIZE
+            rowNum += 1
             posY += SQUARE_SIZE
         return map_rect
 
-        
+
 
 renderer = Rendering()
 
@@ -158,7 +164,7 @@ class Player(pygame.sprite.Sprite):  # création du joueur
                 elif self.wall_jump and key[pygame.K_SPACE]:
                     dy -= self.JUMP
                     self.wall_jump = False
-                
+
                 if self.vel_y < 0:
                     dy = tile.bottom - self.rect.top
                     self.vel_y = 0
@@ -192,4 +198,3 @@ while run:
     screen.blit(player.img, player.rect)
     pygame.display.update()
     clock.tick(fps)
-    
