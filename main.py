@@ -32,7 +32,7 @@ def count_2d_list(nestedList:list):
 
 class Generator:
     def __init__(self) -> None:
-        self.map = [[0 for x in range(20*2)] for y in range(12*2)]
+        self.map = [[0 for x in range(20*10)] for y in range(12*2)]
         self.lenMap = len(self.map)
 
     def Generate(self):
@@ -77,27 +77,37 @@ world = Generator()
 class Rendering:
     def __init__(self) -> None:
         self.square = pygame.Surface((SQUARE_SIZE,SQUARE_SIZE)).convert()
+
+        self.scroll = [0,0]
+
+    def calculate_scrolling(self):
+        self.scroll[0] += (player.rect.x - self.scroll[0]-WIDTH//2)//5
+        self.scroll[1] += (player.rect.y - self.scroll[1] - HEIGHT//2)//20
+        
     def Draw_map(self):
+
         map_rect = list()
-        posY = 0
+        posY = 0 
         rowNum = 0
         for row in world.map:
-            posX = 0
+            posX = 0 
             for tile in row:
                 if tile != 0:
                     map_rect.append(self.square.get_rect(topleft=(posX, posY)))
                 if tile == 1:
                     self.square.fill(color=(217,97,0))
-                    screen.blit(solidBlock(),(posX,posY))
+                    screen.blit(solidBlock(),(posX- self.scroll[0],posY-self.scroll[1]))
                 elif tile == 2:
                     self.square.fill("green3")
-                    screen.blit(self.square,(posX,posY))
+                    screen.blit(self.square,(posX- self.scroll[0],posY-self.scroll[1]))
 
                 posX += SQUARE_SIZE
             rowNum += 1
-            posY += SQUARE_SIZE
-        return map_rect
-
+            posY += SQUARE_SIZE 
+        return map_rect 
+    
+    def Draw_player(self):
+        screen.blit(player.img, (player.rect.x - self.scroll[0], player.rect.y - self.scroll[1]))
 
 
 renderer = Rendering()
@@ -141,10 +151,10 @@ class Player(pygame.sprite.Sprite):  # création du joueur
             self.vel_y = -self.JUMP
             dy += self.vel_y
 
-        if key[pygame.K_LEFT] and self.rect.x > 0:
+        if key[pygame.K_LEFT]: #and self.rect.x > 0:
             dx -= self.SP
 
-        if key[pygame.K_RIGHT] and self.rect.x + self.rect.width < WIDTH:
+        if key[pygame.K_RIGHT]: #and self.rect.x + self.rect.width < WIDTH:
             dx += self.SP
 
         if self.wall_jump is False:
@@ -183,7 +193,7 @@ class Player(pygame.sprite.Sprite):  # création du joueur
 count = 0
 world.Generate()
 player = Player()
-while run:
+while run: 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -194,7 +204,9 @@ while run:
 
     screen.fill("white")
     #renderer.Draw_map()
+    renderer.calculate_scrolling()
     player.move()
-    screen.blit(player.img, player.rect)
+    renderer.Draw_player()
+    
     pygame.display.update()
     clock.tick(fps)
