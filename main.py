@@ -46,6 +46,7 @@ class Generator:
         sin_scale = 0
         sin_size = 2
         sin_offset = 0
+        grass_limit = 15
 
         for line in range(len(self.map[0])):
             line_pose = int(math.sin(sin_scale+sin_offset)*sin_size)+sin_size+10
@@ -63,7 +64,7 @@ class Generator:
                     if rand <= spawn_threshold:
                         self.map[rowNum][tile] = 0
 
-                if self.map[rowNum-1][tile] == 0 and self.map[rowNum][tile] != 0:
+                if self.map[rowNum-1][tile] == 0 and self.map[rowNum][tile] != 0 and rowNum <= grass_limit:
                     self.map[rowNum][tile] = 2
 
 
