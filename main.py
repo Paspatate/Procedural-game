@@ -69,44 +69,43 @@ class Generator:
 
 
 
-
-
-
-
 world = Generator()
 
 class Rendering:
     def __init__(self) -> None:
         self.square = pygame.Surface((SQUARE_SIZE,SQUARE_SIZE)).convert()
 
+        num_tiles = 2
+        tiles_path = "assets/tiles/"
+        self.tiles_dict = dict()
+
+        for tile in range(1,num_tiles+1):
+            self.tiles_dict[tile] = pygame.image.load(f"{tiles_path}{tile}.png").convert()
+
+
         self.scroll = [0,0]
 
     def calculate_scrolling(self):
         self.scroll[0] += (player.rect.x - self.scroll[0]-WIDTH//2)//5
         self.scroll[1] += (player.rect.y - self.scroll[1] - HEIGHT//2)//20
-        
+
     def Draw_map(self):
 
         map_rect = list()
-        posY = 0 
+        posY = 0
         rowNum = 0
         for row in world.map:
-            posX = 0 
+            posX = 0
             for tile in row:
                 if tile != 0:
                     map_rect.append(self.square.get_rect(topleft=(posX, posY)))
-                if tile == 1:
-                    self.square.fill(color=(217,97,0))
-                    screen.blit(solidBlock(),(posX- self.scroll[0],posY-self.scroll[1]))
-                elif tile == 2:
-                    self.square.fill("green3")
-                    screen.blit(self.square,(posX- self.scroll[0],posY-self.scroll[1]))
+                    screen.blit(self.tiles_dict[tile], (posX-self.scroll[0], posY - self.scroll[1]))
 
                 posX += SQUARE_SIZE
             rowNum += 1
-            posY += SQUARE_SIZE 
-        return map_rect 
-    
+            posY += SQUARE_SIZE
+        return map_rect
+
     def Draw_player(self):
         screen.blit(player.img, (player.rect.x - self.scroll[0], player.rect.y - self.scroll[1]))
 
@@ -194,7 +193,7 @@ class Player(pygame.sprite.Sprite):  # création du joueur
 count = 0
 world.Generate()
 player = Player()
-while run: 
+while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -208,6 +207,6 @@ while run:
     renderer.calculate_scrolling()
     player.move()
     renderer.Draw_player()
-    
+
     pygame.display.update()
     clock.tick(fps)
