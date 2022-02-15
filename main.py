@@ -1,4 +1,4 @@
-import pygame, sys, math
+import pygame, sys, math, perlin_noise 
 from random import randint
 
 from pygame.time import Clock
@@ -16,6 +16,7 @@ SQUARE_SIZE = 32
 run = True
 fps = 60
 
+noise = perlin_noise.PerlinNoise(octaves=1, seed=101)
 
 def solidBlock():
     return pygame.Surface((SQUARE_SIZE,SQUARE_SIZE))
@@ -34,7 +35,7 @@ class Generator:
     def __init__(self) -> None:
         self.map = [[0 for x in range(20*10)] for y in range(12*2)]
         self.lenMap = len(self.map)
-
+        self.noise = perlin_noise.PerlinNoise(octaves=4, seed=randint(0,100))
     def Generate(self):
         self.__init__()
 
@@ -43,17 +44,20 @@ class Generator:
 
         spawn_threshold = 3
 
-        sin_scale = 0
-        sin_size = 2
-        sin_offset = 0
+        noise_wavelenght = 0.01
+        noise_height = 20
+        noise_offset = 6
         grass_limit = 15
 
-        for line in range(len(self.map[0])):
-            line_pose = int(math.sin(sin_scale+sin_offset)*sin_size)+sin_size+10
-            self.map[line_pose][line] = 1
-            for i in range(line_pose, self.lenMap-1):
-                self.map[i][line] = 1
-            sin_scale += .5
+        for x in range(len(self.map[0])):
+            y = int(
+                (self.noise(x*noise_wavelenght)*noise_height)+noise_offset
+            )
+            #print(y, end=" ")
+            self.map[y][x] = 1
+            for i in range(y, self.lenMap-1):
+                self.map[i][x] = 1
+            
 
 
         for rowNum in range(len(self.map)):
